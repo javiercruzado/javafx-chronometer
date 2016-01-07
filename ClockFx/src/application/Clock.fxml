@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<BorderPane prefHeight="120.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.ClockController">
+   <center>
+      <HBox prefHeight="107.0" prefWidth="202.0" BorderPane.alignment="TOP_LEFT">
+         <children>
+            <TextField fx:id="tfHours" alignment="CENTER" editable="false" prefHeight="80.0" prefWidth="120.0" text="00">
+               <font>
+                  <Font size="35.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="10.0" right="5.0" top="20.0" />
+               </HBox.margin>
+            </TextField>
+            <TextField fx:id="tfMinutes" alignment="CENTER" editable="false" prefHeight="80.0" prefWidth="120.0" text="00">
+               <font>
+                  <Font size="35.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="10.0" right="5.0" top="20.0" />
+               </HBox.margin>
+            </TextField>
+            <TextField fx:id="tfSeconds" alignment="CENTER" prefHeight="80.0" prefWidth="120.0" text="00">
+               <HBox.margin>
+                  <Insets left="10.0" right="5.0" top="20.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="35.0" />
+               </font>
+            </TextField>
+         </children>
+         <BorderPane.margin>
+            <Insets right="10.0" />
+         </BorderPane.margin>
+      </HBox>
+   </center>
+   <left>
+      <VBox prefWidth="150.0">
+         <children>
+            <Button fx:id="bStartStop" alignment="CENTER" defaultButton="true" mnemonicParsing="false" prefWidth="120.0" rotate="-0.0" text="Start" BorderPane.alignment="TOP_LEFT">
+               <BorderPane.margin>
+                  <Insets right="10.0" />
+               </BorderPane.margin>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+               </VBox.margin>
+            </Button>
+            <Button fx:id="bSave" disable="true" mnemonicParsing="false" prefWidth="120.0" rotate="-0.0" text="Save">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+               </VBox.margin>
+            </Button>
+         </children>
+      </VBox>
+   </left>
+</BorderPane>
