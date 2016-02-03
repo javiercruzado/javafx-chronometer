@@ -16,7 +16,8 @@ public class WorkingLog {
 	public void setLog(HashMap<String, WorkingDayTime> log) {
 		this.log = log;
 	}
-
+	
+	/*Helper*/
 	public void addWorkingDate(WorkingDayTime value) {
 		if (log == null) {
 			log = new HashMap<String, WorkingDayTime>();
