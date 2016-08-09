@@ -1,6 +1,7 @@
 package application.jaxb;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -41,6 +42,18 @@ public class WorkingDayTime {
 
 	public void setDate(LocalDate date) {
 		this.date = date;
+	}
+
+	/**
+	 * Helpers
+	 **/
+
+	public double getTotalHours() {
+		return hours + minutes / 60 + seconds / 3600;
+	}
+
+	public Month getMonth() {
+		return date.getMonth();
 	}
 
 }

@@ -2,10 +2,13 @@ package application;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Month;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +26,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -50,6 +58,15 @@ public class ClockController {
 	@FXML
 	TitledPane tpRecords;
 
+	@FXML
+	TitledPane tpStatitics;
+
+	@FXML
+	Accordion accordion;
+
+	@FXML
+	BarChart<String, Integer> bChart;
+
 	/*
 	 * The state of the Clock
 	 */
@@ -72,7 +89,18 @@ public class ClockController {
 
 	private Timeline saveTimeLine;
 
-	private List<WorkingDayTime> workingDateList;
+	// private List<WorkingDayTime> workingDateList;
+
+	private WorkingLog workingLog;
+
+	private void resizeSceneWindow() {
+		if (accordion.getExpandedPane() != null) {
+			ClockController.this.bSave.getScene().getWindow().setHeight(360);
+		} else {
+			ClockController.this.bSave.getScene().getWindow().setHeight(200);
+
+		}
+	}
 
 	public void initialize() {
 
@@ -80,19 +108,6 @@ public class ClockController {
 		bStartStop.setOnAction(event -> {
 			manageStartStopAction();
 		});
-		tpRecords.expandedProperty().addListener(new ChangeListener<Boolean>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				if (newValue == true) {
-					ClockController.this.bSave.getScene().getWindow().setHeight(360);
-				} else {
-					ClockController.this.bSave.getScene().getWindow().setHeight(180);
-				}
-
-			}
-		});
-
 		bStartStop.setText("Start!");
 
 		tfSeconds.setText("00");
@@ -100,6 +115,17 @@ public class ClockController {
 		tfHours.setText("00");
 
 		loadInitialTime();
+
+		// Accordion
+		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
+
+			@Override
+			public void changed(ObservableValue<? extends TitledPane> observable, TitledPane oldValue,
+					TitledPane newValue) {
+				resizeSceneWindow();
+			}
+
+		});
 
 		// data section
 		TableColumn<WorkingDayTime, LocalDate> day = new TableColumn<WorkingDayTime, LocalDate>();
@@ -120,6 +146,13 @@ public class ClockController {
 		seconds.setCellValueFactory(new PropertyValueFactory<WorkingDayTime, Long>("seconds"));
 		// order the table view by day
 		day.setSortType(TableColumn.SortType.DESCENDING);
+		tvWorkingDay.getSortOrder().add(day);
+		// This performs a sort
+		day.setSortable(true);
+		// test
+		bChart.getData().clear();
+
+		loadChartData();
 
 	}
 
@@ -145,7 +178,6 @@ public class ClockController {
 
 		} else if (currentState.equals(STATE.PAUSED)) {
 			loadInitialTime();
-			// mlastedTime = Duration.between(startTime, LocalDateTime.now());
 			bStartStop.setText("Stop!");
 			bStartStop.setId("buttonStop");
 			currentState = STATE.STARTED;
@@ -205,7 +237,7 @@ public class ClockController {
 			if (f.exists()) {
 				JAXBContext jc = JAXBContext.newInstance(WorkingLog.class);
 				u = jc.createUnmarshaller();
-				WorkingLog workingLog = (WorkingLog) u.unmarshal(f);
+				workingLog = (WorkingLog) u.unmarshal(f);
 
 				//////
 				ReadworkingLog(workingLog);
@@ -234,15 +266,6 @@ public class ClockController {
 
 	// todo: review logic
 	private Object saveTime() {
-		// if (mlastedTime.isZero()) {
-		// mlastedTime = Duration.between(startTime, LocalDateTime.now());
-		// startTime = LocalDateTime.now();
-		// } else {
-		// mlastedTime = mlastedTime.plus(Duration.between(startTime,
-		// LocalDateTime.now()));
-		// startTime = LocalDateTime.now();
-		// }
-		// unmarshal from foo.xml
 		Unmarshaller u;
 		WorkingLog workingLog;
 		WorkingDayTime workingDayTime = null;// = new WorkingDayTime();
@@ -279,10 +302,6 @@ public class ClockController {
 			// marshal to System.out
 			Marshaller m = jc.createMarshaller();
 
-			// workingDayTimeTest = workingDayTime;
-			// workingDayTimeTest.setDate(LocalDate.now().plusDays(1));
-			// workingLog.addWorkingDate(workingDayTimeTest);
-			// m.marshal(fooObj, System.out);
 			m.marshal(workingLog, f);
 		} catch (JAXBException | IOException e1) {
 			log.log(Level.SEVERE, e1.getMessage());
@@ -292,6 +311,64 @@ public class ClockController {
 
 	private String padTimeDuration(long duration) {
 		return String.format("%2s", String.valueOf(duration)).replace(' ', '0');
+	}
+
+	///// test
+	private void loadChartData() {
+
+		final CategoryAxis xAxis = new CategoryAxis();
+		final NumberAxis yAxis = new NumberAxis();
+		final BarChart<String, Number> bc = new BarChart<String, Number>(xAxis, yAxis);
+		bc.setTitle("Country Summary");
+		xAxis.setLabel("Country");
+		yAxis.setLabel("Value");
+
+		XYChart.Series<String, Integer> series_effectivehours = new XYChart.Series<String, Integer>();
+		series_effectivehours.setName("Effective Hours");
+
+		XYChart.Series<String, Integer> series_totalhours = new XYChart.Series<String, Integer>();
+		series_totalhours.setName("Total Hours");
+
+		Map<Month, Integer> data = getDaysByMonth(LocalDate.of(2016, 1, 1), LocalDate.now());
+
+		for (Month m : data.keySet()) {
+			series_totalhours.getData().add(new XYChart.Data<String, Integer>(m.toString(), data.get(m) * 8));
+		}
+
+		if (workingLog != null) {
+			Map<String, Double> log = workingLog.getHoursByMonth();
+			System.out.println(log);
+			log.forEach((k, v) -> {
+				series_effectivehours.getData().add(new XYChart.Data<String, Integer>(k, v.intValue()));
+			});
+		}
+
+		bChart.getData().addAll(series_totalhours, series_effectivehours);
+		bChart.getXAxis().setLabel("Month");
+		bChart.getYAxis().setLabel("Hours");
+	}
+
+	Map<Month, Integer> getDaysByMonth(LocalDate start, LocalDate currentDay) {
+
+		Map<Month, Integer> daysByMonth = new HashMap<Month, Integer>();
+
+		LocalDate tempDate = start;
+
+		while (tempDate.isBefore(currentDay)) {
+			if (tempDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)
+					|| tempDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+				tempDate = tempDate.plusDays(1);
+				continue;
+			}
+			if (daysByMonth.get(tempDate.getMonth()) == null) {
+				daysByMonth.put(tempDate.getMonth(), 1);
+			} else {
+				daysByMonth.put(tempDate.getMonth(), daysByMonth.get(tempDate.getMonth()) + 1);
+			}
+			tempDate = tempDate.plusDays(1);
+		}
+
+		return daysByMonth;
 	}
 
 }
