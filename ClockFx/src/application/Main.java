@@ -15,8 +15,8 @@ public class Main extends Application {
 			primaryStage.setTitle("Clock");
 			primaryStage.getIcons().add(new Image("javafx.png"));
 			// Scene scene = new Scene(root, 480, 120);
-			Scene scene = new Scene(root, 480, 170);
-			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			Scene scene = new Scene(root, 480, 175);
+			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());			
 			primaryStage.setScene(scene);
 			primaryStage.show();
 		} catch (Exception e) {
